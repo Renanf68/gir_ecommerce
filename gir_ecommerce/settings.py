@@ -136,6 +136,12 @@ ALLOWED_HOSTS = ['*']
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 
+#E-mail testar com configurações do gmail
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+DEFAULT_FROM_EMAIL = 'admin@girawaecommerce.com'
+
 try:
     from .local_settings import *
 except ImportError:
