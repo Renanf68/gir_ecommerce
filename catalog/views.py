@@ -8,7 +8,7 @@ class ProductListView(generic.ListView):
 
 	model = Product
 	template_name = 'catalog/product_list.html'
-	paginate_by = 3
+	paginate_by = 6
 
 product_list = ProductListView.as_view()
 
