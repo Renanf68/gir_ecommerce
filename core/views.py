@@ -25,7 +25,7 @@ def contact(request):
 		form.send_mail()	
 		form = ContactForm()
 		success = True
-	elif reuest.method == POST:
+	elif request.method == 'POST':
 		messages.error(request, 'Formulário inválido.')
 	context = {
 		'form': form,
