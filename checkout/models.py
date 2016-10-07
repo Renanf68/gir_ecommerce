@@ -1,6 +1,12 @@
 # coding=utf-8
+
+from pagseguro import PagSeguro
+from pagseguro.config import Config
+
 from django.db import models
 from django.conf import settings
+
+from catalog.models import Product
 
 class CartItemManager(models.Manager):
 
@@ -70,7 +76,7 @@ class Order(models.Model):
 	 	default='deposit'
 	 )
 
-	create = models.DateTimeField('Criado em', auto_now_add=True)
+	created = models.DateTimeField('Criado em', auto_now_add=True)
 	modified = models.DateTimeField('Modificado em', auto_now=True)
 
 	objects = OrderManager()
@@ -82,6 +88,47 @@ class Order(models.Model):
 	def __str__(self):
 	 	return 'Pedido #{}'.format(self.pk)
 
+	def products(self):
+	 	products_ids = self.items.values_list('product')
+	 	return Product.objects.filter(pk__in=products_ids)
+
+	def total(self):
+		aggregate_queryset = self.items.aggregate(
+			total=models.Sum(
+				models.F('price') * models.F('quantity'),
+				output_field=models.DecimalField()
+				)
+			)
+		return aggregate_queryset['total']
+
+	def pagseguro(self):
+		if settings.PAGSEGURO_SANDBOX:
+			config = Config(sandbox=True)
+			pg = PagSeguro(
+				email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN,
+				config=config
+				)
+		else:
+			pg = PagSeguro(
+				email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN
+				)
+		pg.sender = {
+			'email': self.user.email
+		}
+		pg.reference_prefix = None
+		pg.shipping = None
+		pg.reference = self.pk
+		for item in self.items.all():
+			pg.items.append(
+				{
+					'id':item.product.pk,
+					'description':item.product.name,
+					'quantity':item.quantity,
+					'amount': '%.2f' % item.price
+				}
+				)
+		return pg
+				
 class OrderItem(models.Model):
 
 	order = models.ForeignKey(Order, verbose_name='Pedido', related_name='items')

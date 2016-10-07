@@ -155,6 +155,7 @@ AUTHENTICATION_BACKENDS = (
     'accounts.backends.ModelBackend',
     )
 
+
 # Messages
 from django.contrib.messages import constants as messages_constants
 MESSAGE_TAGS = {
