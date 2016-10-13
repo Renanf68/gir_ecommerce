@@ -166,7 +166,7 @@ MESSAGE_TAGS = {
     messages_constants.ERROR: 'danger',
 }
 
-# Pagseguro
+# Pagseguro TOKEN para SANDBOX
 PAGSEGURO_TOKEN = '90FB915E53D14E698EFDBA2C17504396'
 PAGSEGURO_EMAIL = 'renancostam@gmail.com'
 PAGSEGURO_SANDBOX = True
