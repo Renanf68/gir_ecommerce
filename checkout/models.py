@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from pagseguro import PagSeguro, ConfigSandbox
+from pagseguro import PagSeguro
 from pagseguro.config import Config
 
 from django.db import models
@@ -101,38 +101,32 @@ class Order(models.Model):
 			)
 		return aggregate_queryset['total']
 
-	def pagseguro_update_status(self, status):
-		if status == '3':
-			self.status = 1
-		elif status == '7':
-			self.status = 2
-		self.save()	
-
 	def pagseguro(self):
 		if settings.PAGSEGURO_SANDBOX:
+			config = Config(sandbox=True)
 			pg = PagSeguro(
 				email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN,
-				config=ConfigSandbox()
+				config=config
 				)
 		else:
 			pg = PagSeguro(
 				email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN
 				)
-			pg.sender = {
+		pg.sender = {
 			'email': self.user.email
-			}
-		pg.reference_prefix = ''
+		}
+		pg.reference_prefix = None
 		pg.shipping = None
 		pg.reference = self.pk
 		for item in self.items.all():
 			pg.items.append(
 				{
-					'id': item.product.pk,
-					'description': item.product.name,
-					'quantity': item.quantity,
+					'id':item.product.pk,
+					'description':item.product.name,
+					'quantity':item.quantity,
 					'amount': '%.2f' % item.price
 				}
-			)
+				)
 		return pg
 				
 class OrderItem(models.Model):
